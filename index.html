@@ -1,12 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="http://at.alicdn.com/t/font_2514356_mwy5s3s6fx.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 30px 0 0 100px;
+        }
+
+        .select {
+            display: inline-block;
+            margin-right: 5px;
+            position: relative;
+            color: #666;
+            white-space:nowrap;
+        }
+
+        .title {
+            min-width: 150px;
+            display: flex;
+            height: 40px;
+            justify-content: space-between;
+            line-height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        .disabled{
+            color: #cccc;
+        }
+
+        .disabled .title{
+            cursor: not-allowed;
+        }
+
+        .title .iconfont {
+            font-size: 10px;
+            color: #666;
+            transition: .25s;
+        }
+
+        .expand .iconfont {
+            transform: rotate(180deg);
+        }
+        .expand .options{
+            transform: scaleY(1);
+            opacity: 1;
+        }
+        .options{
+            list-style: none;
+            position: absolute;
+            top: 50px;
+            min-width: 100%;
+            max-height: 300px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+            display: grid;
+            /* 多少行自适应 行高20 */
+            grid-template-rows: repeat(auto-fit,20px);
+            /* 网格的排列方式 */
+            grid-auto-flow: column;
+            /* 行的间隙 */
+            row-gap: 6px;
+            /* 列的间隙 */
+            column-gap: 26px;
+            /* 网格的内容靠左对齐 */
+            justify-items: left;
+            padding: 10px;
+            opacity: 0;
+            transform: scaleY(0);
+            transform-origin: center -10px;
+            transition: .25s;
+        }
+        .options li{
+            font-size: 12px;
+            padding: 3px 6px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .options::before{
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            left: 70px;
+            top: -6px;
+            border: 1px solid;
+            border-color: #ccc transparent transparent #ccc;
+            transform: rotate(45deg);
+            background: #fff;
+        }
+        .options li.active{
+            background: orange;
+        }
+    </style>
 </head>
+
 <body>
-    <div>这是远程页面</div>
-    <div>这是第二次提交</div>
+    <div class="select" id="provice" data-name="省份">
+        <div class="title">
+            <span>请选择</span>
+            <i class="iconfont iconarrow-up"></i>
+        </div>
+        <ul class="options">
+            
+        </ul>
+    </div>
+    <div class="select disabled" id="city" data-name="市">
+        <div class="title">
+            <span>请选择</span>
+            <i class="iconfont iconarrow-up"></i>
+        </div>
+    </div>
+    <div class="select disabled" id="area" data-name="区">
+        <div class="title">
+            <span>请选择</span>
+            <i class="iconfont iconarrow-up"></i>
+        </div>
+    </div>
+    <script>
+       (async ()=>{
+            async function getCitys(){
+                console.log(1)
+                return fetch('https://study.duyiedu.com/api/citylist').then((resp) => {
+                    console.log(2)
+                    return resp.json();
+                }).then((res) => {
+                    console.log(3)
+                    return res.data;
+                })
+            }
+            const doms = {
+                provice:document.querySelector('#provice'),
+                city:document.querySelector('#city'),
+                area:document.querySelector('#area')
+            }
+            function fillLi(select,datas){
+                select.className = `select ${datas.length?'':'disabled'}`;
+                const tagName = select.dataset.name;
+                select.querySelector('.title span').innerText = `请选择${tagName}`;
+                // 为选择项添加数据
+                select.datas = datas;
+                const ul = select.querySelector('.options');
+                ul.innerHTML = datas.map((item) => `<li>${item.label}</li>`).join('')
+            }
+            function bindEvent(select){
+                //1.title的点击事件
+                const title = select.querySelector('.title');
+                title.addEventListener('click',function(){
+                    //禁用状态下不起作用
+                    if(select.classList.contains("disabled")) return;
+
+                    select.classList.toggle('expand');
+                })
+                //2.ul的点击事件 
+                //2-1、将点击的文字显示到标题上
+                //2-2、关闭掉ul显示
+                const ul = select.querySelector('.options');
+                ul.addEventListener('click', function(e){
+                    //e.target属于事件的事件源
+                    console.log(e.target)
+                })
+            }
+            function init(){
+                fillLi(doms.provice,datas);
+                //绑定选择框的点击事件
+                bindEvent(doms.provice);
+                bindEvent(doms.city);
+                bindEvent(doms.area);
+            }
+            console.log(0)
+            const datas = await getCitys();
+            init();
+       })(); 
+    </script>
 </body>
+
 </html>
