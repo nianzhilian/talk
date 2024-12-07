@@ -123,12 +123,18 @@
             <span>请选择</span>
             <i class="iconfont iconarrow-up"></i>
         </div>
+        <ul class="options">
+            
+        </ul>
     </div>
     <div class="select disabled" id="area" data-name="区">
         <div class="title">
             <span>请选择</span>
             <i class="iconfont iconarrow-up"></i>
         </div>
+        <ul class="options">
+            
+        </ul>
     </div>
     <script>
        (async ()=>{
@@ -163,23 +169,61 @@
                     //禁用状态下不起作用
                     if(select.classList.contains("disabled")) return;
 
+                    //如果有其他的展开的则关闭掉 只保留当前的
+                    const expands = document.querySelectorAll('.select.expand');
+                    for (const element of expands) {
+                        if(select!==element){
+                            element.classList.remove('expand');
+                        }
+                    }
                     select.classList.toggle('expand');
                 })
                 //2.ul的点击事件 
-                //2-1、将点击的文字显示到标题上
-                //2-2、关闭掉ul显示
                 const ul = select.querySelector('.options');
                 ul.addEventListener('click', function(e){
+                    const target = e.target;
                     //e.target属于事件的事件源
-                    console.log(e.target)
+                    if(target.tagName!=='LI'){
+                        return;
+                    }
+                    //如果之前有选中状态的则取消掉
+                    const beforeLi = this.querySelector('li.active');
+                    beforeLi && beforeLi.classList.remove('active');
+                    target.classList.add('active');
+                    //2-1、将点击的文字显示到标题上
+                    const span = select.querySelector('.title span');
+                    span.innerText = target.innerText;
+                    //2-2、关闭掉ul显示
+                    select.classList.remove('expand');
+                })
+            }
+            function proviceEvent(){
+                const ul = doms.provice.querySelector('.options');
+                ul.addEventListener('click', function(e){
+                    if(e.target.tagName!=='LI') return;
+                    const datas = doms.provice.datas.find((item) => e.target.innerText === item.label);
+                    fillLi(doms.city,datas.children);
+                    fillLi(doms.area,[]);
+                })
+            }
+            function cityEvent(){
+                const ul = doms.city.querySelector('.options');
+                ul.addEventListener('click', function(e){
+                    if(e.target.tagName!=='LI') return;
+                    const datas = doms.city.datas.find((item) => e.target.innerText === item.label);
+                    fillLi(doms.area,datas.children?datas.children:[])
                 })
             }
             function init(){
                 fillLi(doms.provice,datas);
                 //绑定选择框的点击事件
+                //绑定对dom操作的处理
                 bindEvent(doms.provice);
                 bindEvent(doms.city);
                 bindEvent(doms.area);
+                //绑定dom对数据的处理
+                proviceEvent();
+                cityEvent();
             }
             console.log(0)
             const datas = await getCitys();
