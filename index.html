@@ -210,6 +210,7 @@
                 const ul = doms.city.querySelector('.options');
                 ul.addEventListener('click', function(e){
                     if(e.target.tagName!=='LI') return;
+                    console.log(doms.city.datas)
                     const datas = doms.city.datas.find((item) => e.target.innerText === item.label);
                     fillLi(doms.area,datas.children?datas.children:[])
                 })
